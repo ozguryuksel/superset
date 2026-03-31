@@ -23,9 +23,12 @@
 import logging
 import os
 import sys
+from copy import deepcopy
 
 from celery.schedules import crontab
 from flask_caching.backends.filesystemcache import FileSystemCache
+from superset.config import THEME_DARK as BASE_THEME_DARK
+from superset.config import THEME_DEFAULT as BASE_THEME_DEFAULT
 
 logger = logging.getLogger()
 
@@ -142,3 +145,21 @@ try:
     )
 except ImportError:
     logger.info("Using default Docker config...")
+
+
+APP_ICON = "/static/assets/images/gardiyan-logo.svg"
+FAVICONS = [
+    {"href": "/static/assets/images/favicon.svg", "type": "image/svg+xml"},
+]
+
+THEME_DEFAULT = deepcopy(BASE_THEME_DEFAULT)
+THEME_DEFAULT["token"]["brandLogoAlt"] = "Gardiyan"
+THEME_DEFAULT["token"]["brandLogoUrl"] = APP_ICON
+THEME_DEFAULT["token"]["brandSpinnerUrl"] = "/static/assets/images/favicon.svg"
+THEME_DEFAULT["token"]["brandSpinnerSvg"] = None
+
+THEME_DARK = deepcopy(BASE_THEME_DARK)
+THEME_DARK["token"]["brandLogoAlt"] = "Gardiyan"
+THEME_DARK["token"]["brandLogoUrl"] = APP_ICON
+THEME_DARK["token"]["brandSpinnerUrl"] = "/static/assets/images/favicon.svg"
+THEME_DARK["token"]["brandSpinnerSvg"] = None

@@ -25,9 +25,9 @@ import { Typography } from '@superset-ui/core/components/Typography';
 
 export interface Languages {
   [key: string]: {
-    flag: string;
-    url: string;
-    name: string;
+    flag?: string;
+    url?: string;
+    name?: string;
   };
 }
 
@@ -57,13 +57,25 @@ export const useLanguageMenuItems = ({
   languages,
 }: LanguagePickerProps): MenuItem =>
   useMemo(() => {
-    const items: MenuItem[] = Object.keys(languages).map(langKey => ({
+    const safeLanguages = languages ?? {};
+    const languageEntries = Object.entries(safeLanguages).filter(
+      ([, value]) => Boolean(value),
+    );
+    const normalizedLocaleKey =
+      safeLanguages[locale] !== undefined
+        ? locale
+        : locale?.split('_')[0] || locale;
+    const selectedLanguage =
+      safeLanguages[normalizedLocaleKey] || languageEntries[0]?.[1];
+    const selectedFlag = selectedLanguage?.flag || 'us';
+
+    const items: MenuItem[] = languageEntries.map(([langKey, language]) => ({
       key: langKey,
       label: (
         <StyledLabel className="f16">
-          <i className={`flag ${languages[langKey].flag}`} />
-          <Typography.Link href={languages[langKey].url}>
-            {languages[langKey].name}
+          <i className={`flag ${language.flag || 'us'}`} />
+          <Typography.Link href={language.url || '#'}>
+            {language.name || langKey}
           </Typography.Link>
         </StyledLabel>
       ),
@@ -75,7 +87,7 @@ export const useLanguageMenuItems = ({
       type: 'submenu' as const,
       label: (
         <span className="f16" aria-label={t('Languages')}>
-          <i className={`flag ${languages[locale].flag}`} />
+          <i className={`flag ${selectedFlag}`} />
         </span>
       ),
       icon: <Icons.CaretDownOutlined iconSize="xs" />,

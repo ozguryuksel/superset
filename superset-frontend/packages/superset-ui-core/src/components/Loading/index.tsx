@@ -24,28 +24,78 @@ import { Loading as LoaderSvg } from '../assets';
 import type { LoadingProps, SizeOption } from './types';
 
 const SIZE_MAP: Record<SizeOption, string> = {
-  s: '40px',
-  m: '70px',
-  l: '100px',
+  s: '30px',
+  m: '53px',
+  l: '76px',
 };
 
 const LoaderWrapper = styled.div<{
-  $spinnerWidth: string;
-  $spinnerHeight: string;
+  $spinnerSize: string;
   $opacity: number;
 }>`
   z-index: 99;
-  width: ${({ $spinnerWidth }) => $spinnerWidth};
-  height: ${({ $spinnerHeight }) => $spinnerHeight};
+  width: ${({ $spinnerSize }) => $spinnerSize};
+  height: ${({ $spinnerSize }) => $spinnerSize};
   opacity: ${({ $opacity }) => $opacity};
   position: relative;
   margin: 0;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  & > svg,
-  & > img {
+  .loader {
     width: 100%;
     height: 100%;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .loader::before,
+  .loader::after {
+    content: '';
+    box-sizing: border-box;
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+  }
+
+  .loader::before {
+    border-top: 3px solid #cba774;
+    border-right: 3px solid transparent;
+    animation: rotation 1s linear infinite;
+  }
+
+  .loader::after {
+    inset: 3px;
+    border-left: 3px solid #a88860;
+    border-bottom: 3px solid transparent;
+    animation: rotation 0.7s linear infinite reverse;
+  }
+
+  .preloader_logo {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38%;
+    height: 38%;
+    animation-name: preloader-bounce;
+    animation-duration: 0.72s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  .preloader_logo > svg,
+  .preloader_logo > img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   &.inline-centered {
@@ -59,6 +109,27 @@ const LoaderWrapper = styled.div<{
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+  }
+
+  @keyframes rotation {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes preloader-bounce {
+    0%,
+    40%,
+    60%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-26%);
+    }
   }
 `;
 export function Loading({
@@ -95,8 +166,7 @@ export function Loading({
 
   return (
     <LoaderWrapper
-      $spinnerWidth={spinnerSize}
-      $spinnerHeight="auto"
+      $spinnerSize={spinnerSize}
       $opacity={opacity}
       className={cls('loading', position, className)}
       role="status"
@@ -104,7 +174,9 @@ export function Loading({
       aria-label={t('Loading')}
       data-test="loading-indicator"
     >
-      {renderSpinner()}
+      <div className="loader">
+        <div className="preloader_logo">{renderSpinner()}</div>
+      </div>
     </LoaderWrapper>
   );
 }
