@@ -45,6 +45,14 @@ export interface RightMenuProps {
     text: string;
     color: string;
   };
+  layout?: 'horizontal' | 'vertical';
+  showActionDropdown?: boolean;
+  showThemeMenu?: boolean;
+  showLanguageMenu?: boolean;
+  showSettingsMenu?: boolean;
+  showUserMenu?: boolean;
+  showSettingsMetaItems?: boolean;
+  showExtraLinks?: boolean;
 }
 
 export enum GlobalMenuDataOptions {

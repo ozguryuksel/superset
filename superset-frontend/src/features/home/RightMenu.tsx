@@ -17,6 +17,7 @@
  * under the License.
  */
 import { useState, useEffect, FC, PureComponent, useMemo } from 'react';
+import { Global } from '@emotion/react';
 import rison from 'rison';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -43,7 +44,7 @@ import {
   Typography,
   TelemetryPixel,
 } from '@superset-ui/core/components';
-import type { ItemType, MenuItem } from '@superset-ui/core/components/Menu';
+import type { MenuItem } from '@superset-ui/core/components/Menu';
 import { ensureAppRoot, makeUrl } from 'src/utils/pathUtils';
 import { isEmbedded } from 'src/dashboard/util/isEmbedded';
 import { findPermission } from 'src/utils/findPermission';
@@ -69,12 +70,16 @@ import { NAVBAR_MENU_POPUP_OFFSET } from './commonMenuData';
 
 const extensionsRegistry = getExtensionsRegistry();
 
-const StyledDiv = styled.div<{ align: string }>`
-  display: flex;
-  height: 100%;
-  flex-direction: row;
-  justify-content: ${({ align }) => align};
-  align-items: center;
+const StyledDiv = styled.div<{ align: string; $vertical?: boolean }>`
+  ${({ align, $vertical, theme }) => css`
+    display: flex;
+    width: ${$vertical ? '100%' : 'auto'};
+    height: ${$vertical ? 'auto' : '100%'};
+    flex-direction: ${$vertical ? 'column' : 'row'};
+    justify-content: ${$vertical ? 'flex-start' : align};
+    align-items: ${$vertical ? 'stretch' : 'center'};
+    gap: ${$vertical ? `${theme.sizeUnit * 2}px` : 0};
+  `}
 `;
 
 const StyledMenuItemWithIcon = styled.div`
@@ -84,9 +89,25 @@ const StyledMenuItemWithIcon = styled.div`
   align-items: center;
 `;
 
-const StyledAnchor = styled.a`
-  padding-right: ${({ theme }) => theme.sizeUnit}px;
-  padding-left: ${({ theme }) => theme.sizeUnit}px;
+const StyledAnchor = styled.a<{ $vertical?: boolean }>`
+  ${({ theme, $vertical }) => css`
+    padding-right: ${theme.sizeUnit}px;
+    padding-left: ${theme.sizeUnit}px;
+
+    ${$vertical &&
+    css`
+      width: 100%;
+      display: flex;
+      align-items: center;
+      border-radius: ${theme.borderRadius}px;
+      padding: ${theme.sizeUnit * 2}px;
+      color: ${theme.colorText};
+
+      &:hover {
+        background: ${theme.colorBgTextHover};
+      }
+    `}
+  `}
 `;
 
 const StyledMenuItem = styled.div<{ disabled?: boolean }>`
@@ -102,12 +123,152 @@ const StyledMenuItem = styled.div<{ disabled?: boolean }>`
   `}
 `;
 
+const StyledUserMenuTrigger = styled.div`
+  ${({ theme }) => css`
+    display: inline-flex;
+    align-items: center;
+    gap: ${theme.sizeUnit * 2}px;
+    min-width: 0;
+  `}
+`;
+
+const StyledUserAvatar = styled.span`
+  ${({ theme }) => css`
+    width: ${theme.sizeUnit * 7}px;
+    height: ${theme.sizeUnit * 7}px;
+    border-radius: ${theme.borderRadius}px;
+    background: #5f6f9f;
+    color: #ffffff;
+    font-size: ${theme.fontSizeSM}px;
+    font-weight: ${theme.fontWeightStrong};
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    text-transform: uppercase;
+  `}
+`;
+
+const StyledUserName = styled.span`
+  ${({ theme }) => css`
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: ${theme.colorText};
+    font-weight: ${theme.fontWeightStrong};
+  `}
+`;
+
+const StyledUserDropdownHeader = styled.div`
+  ${({ theme }) => css`
+    display: inline-flex;
+    align-items: center;
+    gap: ${theme.sizeUnit * 2}px;
+    font-weight: ${theme.fontWeightStrong};
+    color: ${theme.colorText};
+  `}
+`;
+
+const getSettingsSectionKey = (
+  section: MenuObjectProps,
+  sectionIndex: number,
+) => {
+  const sectionName =
+    section.name ||
+    (typeof section.label === 'string' ? section.label : `section-${sectionIndex}`);
+  return `settings-section-${sectionName}-${sectionIndex}`;
+};
+
+const USER_INFO_PATH = '/user_info/';
+
+const normalizeMenuText = (value?: string) => (value || '').toLowerCase();
+
+const getSettingsSectionIcon = (section: MenuObjectProps) => {
+  const sectionToken = `${normalizeMenuText(section.name)} ${normalizeMenuText(
+    typeof section.label === 'string' ? section.label : '',
+  )}`;
+
+  if (sectionToken.includes('security') || sectionToken.includes('güvenlik')) {
+    return <Icons.LockOutlined iconSize="m" />;
+  }
+  if (sectionToken.includes('data') || sectionToken.includes('veri')) {
+    return <Icons.DatabaseOutlined iconSize="m" />;
+  }
+  if (sectionToken.includes('manage') || sectionToken.includes('yönetim')) {
+    return <Icons.AppstoreOutlined iconSize="m" />;
+  }
+  return <Icons.FolderOutlined iconSize="m" />;
+};
+
+const getSettingsChildIcon = (
+  section: MenuObjectProps,
+  child: MenuObjectChildProps,
+) => {
+  const sectionToken = `${normalizeMenuText(section.name)} ${normalizeMenuText(
+    typeof section.label === 'string' ? section.label : '',
+  )}`;
+  const childToken = `${normalizeMenuText(child.name)} ${normalizeMenuText(
+    typeof child.label === 'string' ? child.label : '',
+  )}`;
+
+  if (sectionToken.includes('security') || sectionToken.includes('güvenlik')) {
+    if (childToken.includes('role')) return <Icons.GroupOutlined iconSize="m" />;
+    if (childToken.includes('user')) return <Icons.UserOutlined iconSize="m" />;
+    if (childToken.includes('group'))
+      return <Icons.UsergroupAddOutlined iconSize="m" />;
+    if (childToken.includes('action') || childToken.includes('log'))
+      return <Icons.HistoryOutlined iconSize="m" />;
+    if (
+      childToken.includes('row level') ||
+      childToken.includes('rls') ||
+      childToken.includes('satır')
+    ) {
+      return <Icons.LockOutlined iconSize="m" />;
+    }
+    return <Icons.KeyOutlined iconSize="m" />;
+  }
+
+  if (sectionToken.includes('data') || sectionToken.includes('veri')) {
+    if (childToken.includes('database'))
+      return <Icons.DatabaseOutlined iconSize="m" />;
+    if (childToken.includes('dataset')) return <Icons.TableOutlined iconSize="m" />;
+    return <Icons.TableOutlined iconSize="m" />;
+  }
+
+  if (sectionToken.includes('manage') || sectionToken.includes('yönetim')) {
+    if (childToken.includes('css')) return <Icons.BgColorsOutlined iconSize="m" />;
+    if (childToken.includes('theme')) return <Icons.BulbOutlined iconSize="m" />;
+    if (
+      childToken.includes('alert') ||
+      childToken.includes('report') ||
+      childToken.includes('uyarı') ||
+      childToken.includes('rapor')
+    ) {
+      return <Icons.BellOutlined iconSize="m" />;
+    }
+    if (childToken.includes('annotation'))
+      return <Icons.EditOutlined iconSize="m" />;
+    return <Icons.SettingOutlined iconSize="m" />;
+  }
+
+  return <Icons.FolderOpenOutlined iconSize="m" />;
+};
+
 const RightMenu = ({
   align,
   settings,
   navbarRight,
   isFrontendRoute,
   environmentTag,
+  layout = 'horizontal',
+  showActionDropdown: showActionDropdownProp = true,
+  showThemeMenu = true,
+  showLanguageMenu = true,
+  showSettingsMenu = true,
+  showUserMenu = false,
+  showSettingsMetaItems = true,
+  showExtraLinks = true,
   setQuery,
 }: RightMenuProps & {
   setQuery: ({
@@ -119,6 +280,7 @@ const RightMenu = ({
   }) => void;
 }) => {
   const theme = useTheme();
+  const isVertical = layout === 'vertical';
   const user = useSelector<any, UserWithPermissionsAndRoles>(
     state => state.user,
   );
@@ -127,6 +289,15 @@ const RightMenu = ({
   );
   const userValues = user || {};
   const { roles } = userValues;
+  const userDisplayName =
+    [userValues?.firstName, userValues?.lastName].filter(Boolean).join(' ') ||
+    userValues?.username ||
+    t('User');
+  const userInitial =
+    (userValues?.firstName?.charAt(0) ||
+      userValues?.username?.charAt(0) ||
+      'U'
+    ).toUpperCase();
   const {
     CSV_EXTENSIONS,
     COLUMNAR_EXTENSIONS,
@@ -140,12 +311,17 @@ const RightMenu = ({
     useState<boolean>(false);
   const [showColumnarUploadModal, setShowColumnarUploadModal] =
     useState<boolean>(false);
+  const [sidebarOpenKeys, setSidebarOpenKeys] = useState<string[]>([]);
   const [engine, setEngine] = useState<string>('');
   const canSql = findPermission('can_sqllab', 'Superset', roles);
   const canDashboard = findPermission('can_write', 'Dashboard', roles);
   const canChart = findPermission('can_write', 'Chart', roles);
   const canDatabase = findPermission('can_write', 'Database', roles);
   const canDataset = findPermission('can_write', 'Dataset', roles);
+  const hasActionDropdownPermission = canSql || canChart || canDashboard;
+  const showActionDropdown =
+    !isVertical && showActionDropdownProp && hasActionDropdownPermission;
+  const shouldShowThemeMenu = !isVertical && showThemeMenu;
 
   const { canUploadData, canUploadCSV, canUploadColumnar, canUploadExcel } =
     uploadUserPerms(
@@ -156,7 +332,6 @@ const RightMenu = ({
       ALLOWED_EXTENSIONS,
     );
 
-  const showActionDropdown = canSql || canChart || canDashboard;
   const [allowUploads, setAllowUploads] = useState<boolean>(false);
   const [nonExamplesDBConnected, setNonExamplesDBConnected] =
     useState<boolean>(false);
@@ -339,6 +514,67 @@ const RightMenu = ({
     }
     return null;
   };
+
+  const settingsSectionKeys = useMemo(
+    () =>
+      (settings || []).map((section, sectionIndex) =>
+        getSettingsSectionKey(section, sectionIndex),
+      ),
+    [settings],
+  );
+
+  const isSettingsSectionKey = (key: string) =>
+    settingsSectionKeys.includes(key);
+
+  const isSettingsRelatedKey = (key: string) =>
+    key === 'settings' ||
+    settingsSectionKeys.some(
+      sectionKey =>
+        key === sectionKey || key.startsWith(`${sectionKey}-`),
+    );
+
+  const normalizeVerticalOpenKeys = (openKeys: string[]) => {
+    const previousSectionKeys = sidebarOpenKeys.filter(isSettingsSectionKey);
+    const currentSectionKeys = openKeys.filter(isSettingsSectionKey);
+    const newlyOpenedSectionKey = currentSectionKeys.find(
+      key => !previousSectionKeys.includes(key),
+    );
+    const previouslyHadSettingsOpen = sidebarOpenKeys.includes('settings');
+    const settingsRootExplicitlyClosed =
+      previouslyHadSettingsOpen && !openKeys.includes('settings');
+
+    const nextOpenKeys = openKeys.filter(key => !isSettingsRelatedKey(key));
+    if (settingsRootExplicitlyClosed) {
+      return Array.from(new Set(nextOpenKeys));
+    }
+
+    const hasSettingsOpen =
+      openKeys.includes('settings') || currentSectionKeys.length > 0;
+    if (hasSettingsOpen) {
+      nextOpenKeys.push('settings');
+    }
+
+    if (hasSettingsOpen && currentSectionKeys.length) {
+      const sectionKeyToKeep =
+        newlyOpenedSectionKey ||
+        currentSectionKeys[currentSectionKeys.length - 1];
+      if (sectionKeyToKeep) {
+        nextOpenKeys.push(sectionKeyToKeep);
+      }
+    }
+
+    return Array.from(new Set(nextOpenKeys));
+  };
+
+  const handleMenuOpenChange = (openKeys: string[]) => {
+    onMenuOpen(openKeys);
+
+    if (!isVertical) {
+      return;
+    }
+
+    setSidebarOpenKeys(normalizeVerticalOpenKeys(openKeys));
+  };
   const RightMenuExtension = extensionsRegistry.get('navbar.right');
   const RightMenuItemIconExtension = extensionsRegistry.get(
     'navbar.right-menu.item.icon',
@@ -368,6 +604,15 @@ const RightMenu = ({
     locale: navbarRight.locale || 'en',
     languages: navbarRight.languages || {},
   });
+  const aboutInfoLines = [
+    navbarRight.show_watermark && t('Powered by Apache Superset'),
+    navbarRight.version_string && `${t('Version')}: ${navbarRight.version_string}`,
+    navbarRight.version_sha && `${t('SHA')}: ${navbarRight.version_sha}`,
+    navbarRight.build_number && `${t('Build')}: ${navbarRight.build_number}`,
+  ].filter(Boolean) as string[];
+  const showLogout =
+    !isEmbedded() ||
+    !isFeatureEnabled(FeatureFlag.DisableEmbeddedSupersetLogout);
 
   // Build main menu items
   const menuItems = useMemo(() => {
@@ -397,6 +642,7 @@ const RightMenu = ({
               label: menu.label,
               icon: menu.icon,
               children: childItems,
+              popupClassName: 'header-action-dropdown-popup',
               popupOffset: NAVBAR_MENU_POPUP_OFFSET,
             });
           } else if (menu.url) {
@@ -440,12 +686,13 @@ const RightMenu = ({
     const buildSettingsMenuItems = (): MenuItem[] => {
       const items: MenuItem[] = [];
 
-      settings?.forEach((section, index) => {
+      settings?.forEach((section, sectionIndex) => {
+        const sectionKey = getSettingsSectionKey(section, sectionIndex);
         const sectionItems: MenuItem[] = [];
 
-        section.childs?.forEach(child => {
+        section.childs?.forEach((child, childIndex) => {
           if (typeof child !== 'string') {
-            const menuItemDisplay = RightMenuItemIconExtension ? (
+            const menuItemDisplay = RightMenuItemIconExtension && !isVertical ? (
               <StyledMenuItemWithIcon>
                 {child.label}
                 <RightMenuItemIconExtension menuChild={child} />
@@ -455,7 +702,8 @@ const RightMenu = ({
             );
 
             sectionItems.push({
-              key: child.label,
+              key: `${sectionKey}-${child.name || child.label || childIndex}`,
+              icon: getSettingsChildIcon(section, child),
               label: isFrontendRoute(child.url) ? (
                 <Link to={child.url || ''}>{menuItemDisplay}</Link>
               ) : (
@@ -474,95 +722,92 @@ const RightMenu = ({
           }
         });
 
-        items.push({
-          type: 'group',
-          label: section.label,
-          key: section.label,
-          children: sectionItems,
-        });
+        if (sectionItems.length) {
+          const sectionMenuItem: MenuItem = {
+            key: sectionKey,
+            label: section.label,
+            icon: getSettingsSectionIcon(section),
+            children: sectionItems,
+          };
 
-        if (index < settings.length - 1) {
-          items.push({ type: 'divider', key: `divider_${index}` });
+          if (!isVertical) {
+            sectionMenuItem.popupClassName = 'settings-sidebar-submenu-popup';
+            sectionMenuItem.popupOffset = NAVBAR_MENU_POPUP_OFFSET;
+          }
+
+          items.push(sectionMenuItem);
         }
       });
 
-      if (!navbarRight.user_is_anonymous) {
-        items.push({ type: 'divider', key: 'user-divider' });
-
-        const userItems: MenuItem[] = [];
-        if (navbarRight.user_info_url) {
+      if (showSettingsMetaItems) {
+        if (!navbarRight.user_is_anonymous) {
+          const userItems: MenuItem[] = [];
           userItems.push({
             key: 'info',
             label: (
-              <Typography.Link href={ensureAppRoot(navbarRight.user_info_url)}>
+              <Typography.Link href={ensureAppRoot(USER_INFO_PATH)}>
                 {t('Info')}
               </Typography.Link>
             ),
           });
-        }
-        const showLogout =
-          !isEmbedded() ||
-          !isFeatureEnabled(FeatureFlag.DisableEmbeddedSupersetLogout);
-        if (showLogout) {
-          userItems.push({
-            key: 'logout',
-            label: (
-              <Typography.Link
-                href={ensureAppRoot(navbarRight.user_logout_url)}
-              >
-                {t('Logout')}
-              </Typography.Link>
-            ),
-            onClick: handleLogout,
-          });
-        }
-
-        items.push({
-          type: 'group',
-          label: t('User'),
-          key: 'user-section',
-          children: userItems,
-        });
-      }
-
-      if (navbarRight.version_string || navbarRight.version_sha) {
-        items.push({ type: 'divider', key: 'version-info-divider' });
-
-        const aboutItem: ItemType = {
-          type: 'group',
-          label: t('About'),
-          key: 'about-section',
-          children: [
-            {
-              key: 'about-info',
-              style: { height: 'auto', minHeight: 'auto' },
+          if (showLogout) {
+            userItems.push({
+              key: 'logout',
               label: (
+                <Typography.Link
+                  href={ensureAppRoot(navbarRight.user_logout_url)}
+                >
+                  {t('Logout')}
+                </Typography.Link>
+              ),
+              onClick: handleLogout,
+            });
+          }
+
+          if (userItems.length) {
+            items.push({
+              key: 'settings-user-section',
+              label: t('User'),
+              children: userItems,
+              popupClassName: 'settings-sidebar-submenu-popup',
+              popupOffset: NAVBAR_MENU_POPUP_OFFSET,
+            });
+          }
+        }
+
+        if (aboutInfoLines.length) {
+          items.push({
+            key: 'about-info',
+            label: (
+              <Tooltip
+                placement="right"
+                title={
+                  <div
+                    css={(theme: SupersetTheme) => css`
+                      font-size: ${theme.fontSizeSM}px;
+                      color: #ffffff;
+                      white-space: pre-wrap;
+                      padding: ${theme.sizeUnit}px ${theme.sizeUnit * 2}px;
+                    `}
+                  >
+                    {aboutInfoLines.join('\n')}
+                  </div>
+                }
+              >
                 <div
-                  css={(theme: SupersetTheme) => css`
-                    font-size: ${theme.fontSizeSM}px;
-                    color: ${theme.colorTextSecondary || theme.colorText};
-                    white-space: pre-wrap;
-                    padding: ${theme.sizeUnit}px ${theme.sizeUnit * 2}px;
+                  css={css`
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
                   `}
                 >
-                  {[
-                    navbarRight.show_watermark &&
-                      t('Powered by Apache Superset'),
-                    navbarRight.version_string &&
-                      `${t('Version')}: ${navbarRight.version_string}`,
-                    navbarRight.version_sha &&
-                      `${t('SHA')}: ${navbarRight.version_sha}`,
-                    navbarRight.build_number &&
-                      `${t('Build')}: ${navbarRight.build_number}`,
-                  ]
-                    .filter(Boolean)
-                    .join('\n')}
+                  <Icons.InfoCircleOutlined iconSize="m" />
+                  <span>{t('About')}</span>
                 </div>
-              ),
-            },
-          ],
-        };
-        items.push(aboutItem);
+              </Tooltip>
+            ),
+          });
+        }
       }
       return items;
     };
@@ -583,46 +828,185 @@ const RightMenu = ({
         className: 'submenu-with-caret',
         icon: <Icons.DownOutlined iconSize="xs" />,
         children: buildNewDropdownItems(),
+        popupClassName: 'header-action-dropdown-popup',
         popupOffset: NAVBAR_MENU_POPUP_OFFSET,
       });
     }
 
-    if (canSetMode()) {
+    if (shouldShowThemeMenu && canSetMode()) {
       items.push(themeMenuItem);
     }
 
-    if (navbarRight.show_language_picker && languageMenuItem) {
+    if (showLanguageMenu && navbarRight.show_language_picker && languageMenuItem) {
       items.push(languageMenuItem);
     }
 
-    items.push({
-      key: 'settings',
-      label: t('Settings'),
-      icon: <Icons.DownOutlined iconSize="xs" />,
-      children: buildSettingsMenuItems(),
-      className: 'submenu-with-caret',
-      popupOffset: NAVBAR_MENU_POPUP_OFFSET,
-    });
+    if (showUserMenu && !isVertical && !navbarRight.user_is_anonymous) {
+      const userMenuChildren: MenuItem[] = [
+        {
+          key: 'user-profile-header',
+          disabled: true,
+          label: (
+            <StyledUserDropdownHeader>
+              <Icons.UserOutlined iconSize="m" />
+              <span>{userDisplayName}</span>
+            </StyledUserDropdownHeader>
+          ),
+        },
+        {
+          type: 'divider',
+          key: 'user-profile-divider-1',
+        },
+        {
+          key: 'user-dashboard-list',
+          icon: <Icons.DashboardOutlined iconSize="m" />,
+          label: isFrontendRoute('/dashboard/list/') ? (
+            <Link to="/dashboard/list/">{t('Dashboard')}</Link>
+          ) : (
+            <Typography.Link href={ensureAppRoot('/dashboard/list/')}>
+              {t('Dashboard')}
+            </Typography.Link>
+          ),
+        },
+      ];
+
+      if (aboutInfoLines.length) {
+        userMenuChildren.push({
+          key: 'user-about-info',
+          icon: <Icons.InfoCircleOutlined iconSize="m" />,
+          label: (
+            <Tooltip
+              placement="left"
+              title={
+                <div
+                  css={(theme: SupersetTheme) => css`
+                    font-size: ${theme.fontSizeSM}px;
+                    color: #ffffff;
+                    white-space: pre-wrap;
+                    padding: ${theme.sizeUnit}px ${theme.sizeUnit * 2}px;
+                  `}
+                >
+                  {aboutInfoLines.join('\n')}
+                </div>
+              }
+            >
+              <span>{t('About')}</span>
+            </Tooltip>
+          ),
+        });
+      }
+
+      if (showLogout) {
+        userMenuChildren.push({
+          key: 'user-logout',
+          icon: <Icons.LoginOutlined iconSize="m" />,
+          label: (
+            <Typography.Link href={ensureAppRoot(navbarRight.user_logout_url)}>
+              {t('Logout')}
+            </Typography.Link>
+          ),
+          onClick: handleLogout,
+        });
+      }
+
+      items.push({
+        key: 'user-profile-menu',
+        label: (
+          <StyledUserMenuTrigger>
+            <StyledUserAvatar>{userInitial}</StyledUserAvatar>
+            <StyledUserName>{userDisplayName}</StyledUserName>
+          </StyledUserMenuTrigger>
+        ),
+        className: 'submenu-with-caret user-menu-trigger',
+        icon: <Icons.DownOutlined iconSize="xs" />,
+        children: userMenuChildren,
+        popupClassName: 'header-user-dropdown-popup',
+        popupOffset: NAVBAR_MENU_POPUP_OFFSET,
+        onTitleClick: () => {
+          const userInfoUrl = navbarRight.user_info_url || '/users/userinfo/';
+          window.location.assign(ensureAppRoot(userInfoUrl));
+        },
+      });
+    }
+
+    if (showSettingsMenu) {
+      const settingsMenuItem: MenuItem = {
+        key: 'settings',
+        label: t('Settings'),
+        icon: isVertical ? (
+          <Icons.SettingOutlined iconSize="m" />
+        ) : (
+          <Icons.DownOutlined iconSize="xs" />
+        ),
+        children: buildSettingsMenuItems(),
+        className: isVertical
+          ? 'submenu-with-caret settings-sidebar-item'
+          : 'submenu-with-caret',
+      };
+
+      if (!isVertical) {
+        settingsMenuItem.popupOffset = NAVBAR_MENU_POPUP_OFFSET;
+      }
+
+      items.push(settingsMenuItem);
+    }
 
     return items;
   }, [
     RightMenuExtension,
     navbarRight,
     showActionDropdown,
+    shouldShowThemeMenu,
+    showLanguageMenu,
+    showSettingsMenu,
+    showUserMenu,
+    showSettingsMetaItems,
     canSetMode,
+    isVertical,
     theme.colorPrimary,
     themeMenuItem,
     languageMenuItem,
     dropdownItems,
     roles,
     settings,
+    userDisplayName,
+    userInitial,
+    aboutInfoLines,
+    showLogout,
     RightMenuItemIconExtension,
     buildMenuItem,
     handleLogout,
   ]);
 
   return (
-    <StyledDiv align={align}>
+    <StyledDiv align={align} $vertical={isVertical}>
+      {!isVertical && (
+        <Global
+          styles={css`
+            .header-action-dropdown-popup.ant-menu-submenu-popup {
+              z-index: 1205 !important;
+            }
+
+            .header-action-dropdown-popup .ant-menu {
+              z-index: 1205 !important;
+            }
+
+            .header-user-dropdown-popup.ant-menu-submenu-popup {
+              z-index: 1205 !important;
+            }
+
+            .header-user-dropdown-popup .ant-menu {
+              min-width: 240px;
+              z-index: 1205 !important;
+            }
+
+            .header-user-dropdown-popup .ant-menu-item-disabled {
+              opacity: 1 !important;
+              cursor: default !important;
+            }
+          `}
+        />
+      )}
       {canDatabase && (
         <DatabaseModal
           onHide={handleOnHideModal}
@@ -683,10 +1067,18 @@ const RightMenu = ({
         })()}
       <Menu
         css={css`
+          &.ant-menu,
+          &.ant-menu-inline,
+          &.ant-menu-vertical {
+            background: transparent !important;
+            border-inline-end: none !important;
+          }
+
           display: flex;
-          flex-direction: row;
+          flex-direction: ${isVertical ? 'column' : 'row'};
           align-items: center;
-          height: 100%;
+          height: ${isVertical ? 'auto' : '100%'};
+          width: ${isVertical ? '100%' : 'auto'};
           border-bottom: none !important;
 
           /* Remove the underline from menu items */
@@ -695,41 +1087,193 @@ const RightMenu = ({
             content: none !important;
           }
 
-          .submenu-with-caret {
-            height: 100%;
-            padding: 0;
+          ${isVertical &&
+          css`
+            &.ant-menu-vertical,
+            &.ant-menu-inline {
+              display: block !important;
+              width: 100%;
+              background: transparent !important;
+              border-inline-end: none !important;
+            }
+
+            .ant-menu-vertical .ant-menu-item .ant-menu-item-icon,
+            .ant-menu-vertical .ant-menu-submenu-title .ant-menu-item-icon,
+            .ant-menu-inline .ant-menu-item .ant-menu-item-icon,
+            .ant-menu-inline .ant-menu-submenu-title .ant-menu-item-icon {
+              color: #e8ebf4 !important;
+              font-size: ${theme.fontSizeLG}px;
+              margin-inline-end: ${theme.sizeUnit * 2}px;
+            }
+
+            .ant-menu-vertical
+                .ant-menu-item
+                .ant-menu-item-icon
+                + .ant-menu-title-content,
+            .ant-menu-vertical
+                .ant-menu-submenu-title
+                .ant-menu-item-icon
+                + .ant-menu-title-content,
+            .ant-menu-inline
+                .ant-menu-item
+                .ant-menu-item-icon
+                + .ant-menu-title-content,
+            .ant-menu-inline
+                .ant-menu-submenu-title
+                .ant-menu-item-icon
+                + .ant-menu-title-content {
+              margin-inline-start: ${theme.sizeUnit * 2}px !important;
+            }
+
+            .ant-menu-vertical > .ant-menu-item,
+            .ant-menu-vertical > .ant-menu-submenu,
+            .ant-menu-inline > .ant-menu-item {
+              width: 100%;
+              margin: ${theme.sizeUnit}px 0 !important;
+              border-radius: ${theme.borderRadius}px;
+              min-height: ${theme.sizeUnit * 11}px;
+              line-height: ${theme.sizeUnit * 11}px;
+              padding: 0 ${theme.sizeUnit * 2}px !important;
+            }
+
+            .ant-menu-inline > .ant-menu-submenu {
+              width: 100%;
+              margin: ${theme.sizeUnit}px 0 !important;
+              border-radius: ${theme.borderRadius}px;
+              min-height: auto !important;
+              line-height: normal !important;
+              padding: 0 !important;
+              overflow: visible;
+            }
+
+            .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
+              min-height: ${theme.sizeUnit * 11}px;
+              line-height: ${theme.sizeUnit * 11}px;
+              padding: 0 ${theme.sizeUnit * 2}px !important;
+              display: flex;
+              align-items: center;
+            }
+
             .ant-menu-submenu-title {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              width: 100%;
+            }
+
+            .ant-menu-inline .ant-menu-title-content {
+              min-width: 0;
+              flex: 1;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+
+            .ant-menu-inline .ant-menu-sub.ant-menu-inline {
+              background: transparent !important;
+            }
+
+            .ant-menu-inline .ant-menu-sub.ant-menu-inline .ant-menu-item,
+            .ant-menu-inline
+              .ant-menu-sub.ant-menu-inline
+              .ant-menu-submenu-title {
+              margin: ${theme.sizeUnit}px 0 !important;
+              border-radius: ${theme.borderRadius}px;
+              min-height: ${theme.sizeUnit * 10}px;
+              line-height: ${theme.sizeUnit * 10}px;
+            }
+
+            .ant-menu-inline .ant-menu-sub.ant-menu-inline .ant-menu-item,
+            .ant-menu-inline
+              .ant-menu-sub.ant-menu-inline
+              .ant-menu-submenu
+              .ant-menu-submenu-title {
+              padding-inline-start: ${theme.sizeUnit * 7}px !important;
+            }
+
+            .settings-sidebar-item .ant-menu-sub.ant-menu-inline .ant-menu-item,
+            .settings-sidebar-item
+              .ant-menu-sub.ant-menu-inline
+              .ant-menu-submenu-title {
+              padding-inline-start: ${theme.sizeUnit * 2}px !important;
+            }
+
+            .ant-menu-inline .ant-menu-submenu-arrow::before,
+            .ant-menu-inline .ant-menu-submenu-arrow::after {
+              background: #e8ebf4 !important;
+            }
+
+            .ant-menu-inline .ant-menu-submenu-open > .ant-menu-submenu-title
+              .ant-menu-submenu-arrow::before,
+            .ant-menu-inline .ant-menu-submenu-open > .ant-menu-submenu-title
+              .ant-menu-submenu-arrow::after {
+              background: #cba774 !important;
+            }
+
+            .settings-sidebar-item .ant-menu-title-content {
+              color: #e8ebf4 !important;
+            }
+
+            .settings-sidebar-item.ant-menu-submenu:hover
+              > .ant-menu-submenu-title
+              .ant-menu-title-content,
+            .settings-sidebar-item.ant-menu-submenu-active
+              > .ant-menu-submenu-title
+              .ant-menu-title-content {
+              color: #cba774 !important;
+            }
+          `}
+
+          .submenu-with-caret {
+            height: ${isVertical ? 'auto' : '100%'};
+            > .ant-menu-submenu-title {
               align-items: center;
               display: flex;
-              gap: ${theme.sizeUnit * 2}px;
-              flex-direction: row-reverse;
-              height: 100%;
+              gap: ${isVertical ? 0 : theme.sizeUnit * 2}px;
+              flex-direction: ${isVertical ? 'row' : 'row-reverse'};
+              height: ${isVertical ? 'auto' : '100%'};
             }
             &.ant-menu-submenu::after {
               inset-inline: ${theme.sizeUnit}px;
             }
-            &.ant-menu-submenu:hover,
-            &.ant-menu-submenu-active {
+            &.ant-menu-submenu:hover > .ant-menu-submenu-title,
+            &.ant-menu-submenu-active > .ant-menu-submenu-title {
               .ant-menu-title-content {
                 color: ${theme.colorPrimary};
               }
             }
+
+            &.settings-sidebar-item.ant-menu-submenu:hover
+              > .ant-menu-submenu-title,
+            &.settings-sidebar-item.ant-menu-submenu-active
+              > .ant-menu-submenu-title {
+              .ant-menu-title-content {
+                color: #cba774 !important;
+              }
+            }
+
+            &.user-menu-trigger .ant-menu-submenu-title {
+              flex-direction: row !important;
+            }
           }
         `}
         selectable={false}
-        mode="horizontal"
+        mode={isVertical ? 'inline' : 'horizontal'}
+        triggerSubMenuAction={isVertical ? 'click' : 'hover'}
         onClick={handleMenuSelection}
-        onOpenChange={onMenuOpen}
+        onOpenChange={handleMenuOpenChange}
+        openKeys={isVertical ? sidebarOpenKeys : undefined}
         disabledOverflow
         items={menuItems}
       />
-      {navbarRight.documentation_url && (
+      {showExtraLinks && navbarRight.documentation_url && (
         <>
           <StyledAnchor
             href={navbarRight.documentation_url}
             target="_blank"
             rel="noreferrer"
             title={navbarRight.documentation_text || t('Documentation')}
+            $vertical={isVertical}
           >
             {navbarRight.documentation_icon ? (
               <Icons.BookOutlined />
@@ -737,16 +1281,17 @@ const RightMenu = ({
               <Icons.QuestionCircleOutlined />
             )}
           </StyledAnchor>
-          <span>&nbsp;</span>
+          {!isVertical && <span>&nbsp;</span>}
         </>
       )}
-      {navbarRight.bug_report_url && (
+      {showExtraLinks && navbarRight.bug_report_url && (
         <>
           <StyledAnchor
             href={navbarRight.bug_report_url}
             target="_blank"
             rel="noreferrer"
             title={navbarRight.bug_report_text || t('Report a bug')}
+            $vertical={isVertical}
           >
             {navbarRight.bug_report_icon ? (
               <i className={navbarRight.bug_report_icon} />
@@ -754,11 +1299,11 @@ const RightMenu = ({
               <Icons.BugOutlined />
             )}
           </StyledAnchor>
-          <span>&nbsp;</span>
+          {!isVertical && <span>&nbsp;</span>}
         </>
       )}
-      {navbarRight.user_is_anonymous && (
-        <StyledAnchor href={navbarRight.user_login_url}>
+      {showExtraLinks && navbarRight.user_is_anonymous && (
+        <StyledAnchor href={navbarRight.user_login_url} $vertical={isVertical}>
           <Icons.LoginOutlined /> {t('Login')}
         </StyledAnchor>
       )}

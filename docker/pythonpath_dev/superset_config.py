@@ -163,3 +163,9 @@ THEME_DARK["token"]["brandLogoAlt"] = "Gardiyan"
 THEME_DARK["token"]["brandLogoUrl"] = APP_ICON
 THEME_DARK["token"]["brandSpinnerUrl"] = "/static/assets/images/favicon.svg"
 THEME_DARK["token"]["brandSpinnerSvg"] = None
+
+BABEL_DEFAULT_LOCALE = "tr"
+LANGUAGES = {
+    "tr": {"flag": "tr", "name": "Türkçe"},
+    "en": {"flag": "us", "name": "English"},
+}

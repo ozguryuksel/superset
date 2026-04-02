@@ -363,10 +363,10 @@ test('should render the top navbar child menu items', async () => {
     useTheme: true,
   });
   const sources = await screen.findByText('Sources');
-  userEvent.hover(sources);
+  userEvent.click(sources);
 
-  const datasets = await screen.findByText('Datasets');
-  const databases = await screen.findByText('Databases');
+  const [datasets] = await screen.findAllByText('Datasets');
+  const [databases] = await screen.findAllByText('Databases');
   const dataset = menu[1].childs![0] as { url: string };
   const database = menu[1].childs![2] as { url: string };
 
@@ -425,7 +425,7 @@ test('should render the Settings menu item', async () => {
     useRouter: true,
     useTheme: true,
   });
-  userEvent.hover(screen.getByText('Settings'));
+  await userEvent.click(screen.getByText('Settings'));
   const label = await screen.findByText('Security');
   expect(label).toBeInTheDocument();
 });
@@ -441,7 +441,8 @@ test('should render the Settings dropdown child menu items', async () => {
     useRouter: true,
     useTheme: true,
   });
-  userEvent.hover(screen.getByText('Settings'));
+  await userEvent.click(screen.getByText('Settings'));
+  await userEvent.click(await screen.findByText('Security'));
   const listUsers = await screen.findByText('List Users');
   expect(listUsers).toHaveAttribute('href', settings[0].childs[0].url);
 });
@@ -483,9 +484,10 @@ test('should render the user actions when user is not anonymous', async () => {
     useRouter: true,
     useTheme: true,
   });
-  userEvent.hover(screen.getByText('Settings'));
+  await userEvent.click(screen.getByText('Settings'));
   const user = await screen.findByText('User');
   expect(user).toBeInTheDocument();
+  await userEvent.click(user);
 
   const info = await screen.findByText('Info');
   const logout = await screen.findByText('Logout');
@@ -520,11 +522,10 @@ test('should render the About section and version_string, sha or build_number wh
     useRouter: true,
     useTheme: true,
   });
-  userEvent.hover(screen.getByText('Settings'));
+  await userEvent.click(screen.getByText('Settings'));
   const about = await screen.findByText('About');
+  await userEvent.hover(about);
 
-  // The version information is rendered as combined text in a single element
-  // Use getAllByText to get all matching elements and check the first one
   const versionTexts = await screen.findAllByText(
     (_, element) =>
       element?.textContent?.includes(`Version: ${version_string}`) ?? false,
@@ -544,7 +545,7 @@ test('should render the About section and version_string, sha or build_number wh
   expect(buildTexts[0]).toBeInTheDocument();
 });
 
-test('should render the Documentation link when available', async () => {
+test('should hide the Documentation link in custom sidebar layout', async () => {
   useSelectorMock.mockReturnValue({ roles: user.roles });
   const {
     data: {
@@ -557,12 +558,12 @@ test('should render the Documentation link when available', async () => {
     useRouter: true,
     useTheme: true,
   });
-  userEvent.hover(screen.getByText('Settings'));
-  const doc = await screen.findByTitle('Documentation');
-  expect(doc).toHaveAttribute('href', documentation_url);
+  expect(await screen.findByText('Settings')).toBeInTheDocument();
+  expect(screen.queryByTitle('Documentation')).not.toBeInTheDocument();
+  expect(documentation_url).toBeTruthy();
 });
 
-test('should render the Bug Report link when available', async () => {
+test('should hide the Bug Report link in custom sidebar layout', async () => {
   useSelectorMock.mockReturnValue({ roles: user.roles });
   const {
     data: {
@@ -576,11 +577,12 @@ test('should render the Bug Report link when available', async () => {
     useRouter: true,
     useTheme: true,
   });
-  const bugReport = await screen.findByTitle('Report a bug');
-  expect(bugReport).toHaveAttribute('href', bug_report_url);
+  expect(await screen.findByText('Settings')).toBeInTheDocument();
+  expect(screen.queryByTitle('Report a bug')).not.toBeInTheDocument();
+  expect(bug_report_url).toBeTruthy();
 });
 
-test('should render the Login link when user is anonymous', async () => {
+test('should hide the Login link in custom sidebar layout when user is anonymous', async () => {
   useSelectorMock.mockReturnValue({ roles: user.roles });
   const {
     data: {
@@ -594,8 +596,9 @@ test('should render the Login link when user is anonymous', async () => {
     useRouter: true,
     useTheme: true,
   });
-  const login = await screen.findByText('Login');
-  expect(login).toHaveAttribute('href', user_login_url);
+  expect(await screen.findByText('Settings')).toBeInTheDocument();
+  expect(screen.queryByText('Login')).not.toBeInTheDocument();
+  expect(user_login_url).toBeTruthy();
 });
 
 test('should render the Language Picker', async () => {

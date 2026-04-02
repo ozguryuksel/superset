@@ -1,0 +1,161 @@
+
+
+<!DOCTYPE html>
+<html>
+  
+  
+  
+  
+
+  <head>
+    <title>
+      
+        
+          Superset
+        
+      
+    </title>
+
+    
+      <link rel="manifest" href="/static/assets/pwa-manifest.json?v=4">
+    
+
+    <style>
+      
+      body {
+        background: #fff;
+        color: #000;
+      }
+      
+    </style>
+
+    
+    <script nonce="mBHceS93vkxMnxo3Vz0gb4yLX3bPlfjD">
+      (function() {
+        try {
+          var mode = localStorage.getItem('superset-theme-mode');
+          var shouldBeDark = mode === 'dark' ||
+            (mode !== 'default' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (shouldBeDark) {
+            var s = document.createElement('style');
+            s.textContent = 'body{background:#000;color:#fff}';
+            document.head.appendChild(s);
+          }
+        } catch(e) {}
+      })();
+    </script>
+    
+
+    
+      
+        <link
+          rel="icon"
+          type="image/svg+xml"
+          
+          href="/static/assets/images/favicon.svg"
+        />
+      
+
+      <link
+        rel="preload"
+        type="text/css"
+        href="/static/appbuilder/css/flags/flags16.css"
+        as="style"
+      />
+
+    
+
+    
+<!-- Bundle css theme START -->
+
+<!-- Bundle css theme END -->
+
+    
+      
+<!-- Bundle css spa START -->
+
+<!-- Bundle css spa END -->
+
+    
+
+    
+
+<!-- Bundle js theme START -->
+
+<!-- Bundle js theme END -->
+
+
+    
+      
+
+  
+      <script nonce="mBHceS93vkxMnxo3Vz0gb4yLX3bPlfjD">
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker
+              .register('/static/service-worker.js')
+              .catch(function(err) {
+                console.error('Service Worker registration failed:', err);
+              });
+          });
+        }
+      </script>
+    
+
+    <input
+      type="hidden"
+      name="csrf_token"
+      id="csrf_token"
+      value="ImRlYzU3YjYwYjg3MWQyOTk0Y2RjNTI0OTFiM2EzYWU1NzI2NzZhNzki.ac4KMQ.zs8fyNW-tlT60CjtCtFwF2y2dVE"
+    />
+  </head>
+
+  <body >
+
+    
+      <div id="app" data-bootstrap="{&#34;user&#34;: {&#34;roles&#34;: {&#34;Public&#34;: []}, &#34;permissions&#34;: {}}, &#34;common&#34;: {&#34;application_root&#34;: &#34;/&#34;, &#34;static_assets_prefix&#34;: &#34;&#34;, &#34;conf&#34;: {&#34;SUPERSET_WEBSERVER_TIMEOUT&#34;: 60, &#34;SUPERSET_DASHBOARD_POSITION_DATA_LIMIT&#34;: 65535, &#34;SUPERSET_DASHBOARD_PERIODICAL_REFRESH_LIMIT&#34;: 0, &#34;SUPERSET_DASHBOARD_PERIODICAL_REFRESH_WARNING_MESSAGE&#34;: null, &#34;ENABLE_JAVASCRIPT_CONTROLS&#34;: null, &#34;DEFAULT_SQLLAB_LIMIT&#34;: 1000, &#34;DEFAULT_VIZ_TYPE&#34;: &#34;table&#34;, &#34;SQL_MAX_ROW&#34;: 100000, &#34;SUPERSET_WEBSERVER_DOMAINS&#34;: null, &#34;SQLLAB_SAVE_WARNING_MESSAGE&#34;: null, &#34;SQLLAB_DEFAULT_DBID&#34;: null, &#34;DISPLAY_MAX_ROW&#34;: 10000, &#34;GLOBAL_ASYNC_QUERIES_TRANSPORT&#34;: &#34;polling&#34;, &#34;GLOBAL_ASYNC_QUERIES_POLLING_DELAY&#34;: 500, &#34;SQL_VALIDATORS_BY_ENGINE&#34;: {&#34;presto&#34;: &#34;PrestoDBSQLValidator&#34;, &#34;postgresql&#34;: &#34;PostgreSQLValidator&#34;}, &#34;SQLALCHEMY_DOCS_URL&#34;: null, &#34;SQLALCHEMY_DISPLAY_TEXT&#34;: null, &#34;GLOBAL_ASYNC_QUERIES_WEBSOCKET_URL&#34;: &#34;ws://127.0.0.1:8080/&#34;, &#34;DASHBOARD_AUTO_REFRESH_MODE&#34;: &#34;force&#34;, &#34;DASHBOARD_AUTO_REFRESH_INTERVALS&#34;: [[0, &#34;Don&#39;t refresh&#34;], [10, &#34;10 seconds&#34;], [30, &#34;30 seconds&#34;], [60, &#34;1 minute&#34;], [300, &#34;5 minutes&#34;], [1800, &#34;30 minutes&#34;], [3600, &#34;1 hour&#34;], [21600, &#34;6 hours&#34;], [43200, &#34;12 hours&#34;], [86400, &#34;24 hours&#34;]], &#34;DASHBOARD_VIRTUALIZATION&#34;: null, &#34;DASHBOARD_VIRTUALIZATION_DEFER_DATA&#34;: null, &#34;SCHEDULED_QUERIES&#34;: {}, &#34;EXCEL_EXTENSIONS&#34;: [&#34;xlsx&#34;, &#34;xls&#34;], &#34;CSV_EXTENSIONS&#34;: [&#34;csv&#34;, &#34;txt&#34;, &#34;tsv&#34;], &#34;COLUMNAR_EXTENSIONS&#34;: [&#34;parquet&#34;, &#34;zip&#34;], &#34;ALLOWED_EXTENSIONS&#34;: [&#34;zip&#34;, &#34;xlsx&#34;, &#34;parquet&#34;, &#34;txt&#34;, &#34;csv&#34;, &#34;xls&#34;, &#34;tsv&#34;], &#34;SAMPLES_ROW_LIMIT&#34;: 1000, &#34;DEFAULT_TIME_FILTER&#34;: &#34;No filter&#34;, &#34;HTML_SANITIZATION&#34;: true, &#34;HTML_SANITIZATION_SCHEMA_EXTENSIONS&#34;: {}, &#34;WELCOME_PAGE_LAST_TAB&#34;: &#34;all&#34;, &#34;VIZ_TYPE_DENYLIST&#34;: [], &#34;ALERT_REPORTS_DEFAULT_CRON_VALUE&#34;: &#34;0 0 * * *&#34;, &#34;ALERT_REPORTS_DEFAULT_RETENTION&#34;: 90, &#34;ALERT_REPORTS_DEFAULT_WORKING_TIMEOUT&#34;: 3600, &#34;NATIVE_FILTER_DEFAULT_ROW_LIMIT&#34;: 1000, &#34;SUPERSET_CLIENT_RETRY_ATTEMPTS&#34;: 3, &#34;SUPERSET_CLIENT_RETRY_DELAY&#34;: 1000, &#34;SUPERSET_CLIENT_RETRY_BACKOFF_MULTIPLIER&#34;: 2, &#34;SUPERSET_CLIENT_RETRY_MAX_DELAY&#34;: 10000, &#34;SUPERSET_CLIENT_RETRY_JITTER_MAX&#34;: 1000, &#34;SUPERSET_CLIENT_RETRY_STATUS_CODES&#34;: [502, 503, 504], &#34;PREVENT_UNSAFE_DEFAULT_URLS_ON_DATASET&#34;: true, &#34;JWT_ACCESS_CSRF_COOKIE_NAME&#34;: &#34;csrf_access_token&#34;, &#34;SQLLAB_QUERY_RESULT_TIMEOUT&#34;: 0, &#34;SYNC_DB_PERMISSIONS_IN_ASYNC_MODE&#34;: false, &#34;TABLE_VIZ_MAX_ROW_SERVER&#34;: 500000, &#34;MAPBOX_API_KEY&#34;: &#34;&#34;, &#34;CSV_STREAMING_ROW_THRESHOLD&#34;: 100000, &#34;ALERT_REPORTS_NOTIFICATION_METHODS&#34;: [&#34;Email&#34;, &#34;Webhook&#34;], &#34;HAS_GSHEETS_INSTALLED&#34;: true, &#34;AUTH_USER_REGISTRATION&#34;: false, &#34;AUTH_TYPE&#34;: 1}, &#34;locale&#34;: &#34;tr&#34;, &#34;d3_format&#34;: {}, &#34;d3_time_format&#34;: {}, &#34;currencies&#34;: [&#34;USD&#34;, &#34;EUR&#34;, &#34;GBP&#34;, &#34;INR&#34;, &#34;MXN&#34;, &#34;JPY&#34;, &#34;CNY&#34;], &#34;deckgl_tiles&#34;: null, &#34;feature_flags&#34;: {&#34;AG_GRID_TABLE_ENABLED&#34;: false, &#34;ALERT_REPORT_TABS&#34;: false, &#34;CHART_PLUGINS_EXPERIMENTAL&#34;: false, &#34;CSV_UPLOAD_PYARROW_ENGINE&#34;: false, &#34;DATASET_FOLDERS&#34;: true, &#34;DATE_RANGE_TIMESHIFTS_ENABLED&#34;: false, &#34;FAB_API_KEY_ENABLED&#34;: false, &#34;GRANULAR_EXPORT_CONTROLS&#34;: false, &#34;ENABLE_ADVANCED_DATA_TYPES&#34;: false, &#34;ENABLE_EXTENSIONS&#34;: false, &#34;MATRIXIFY&#34;: false, &#34;OPTIMIZE_SQL&#34;: false, &#34;PRESTO_EXPAND_DATA&#34;: false, &#34;TABLE_V2_TIME_COMPARISON_ENABLED&#34;: false, &#34;TAGGING_SYSTEM&#34;: false, &#34;ALERT_REPORTS_FILTER&#34;: false, &#34;ALERT_REPORTS&#34;: true, &#34;ALERT_REPORT_SLACK_V2&#34;: false, &#34;ALERT_REPORT_WEBHOOK&#34;: false, &#34;ALLOW_FULL_CSV_EXPORT&#34;: false, &#34;CACHE_IMPERSONATION&#34;: false, &#34;DATE_FORMAT_IN_EMAIL_SUBJECT&#34;: false, &#34;DYNAMIC_PLUGINS&#34;: false, &#34;ENABLE_DASHBOARD_SCREENSHOT_ENDPOINTS&#34;: false, &#34;ENABLE_DASHBOARD_DOWNLOAD_WEBDRIVER_SCREENSHOT&#34;: false, &#34;ENABLE_SUPERSET_META_DB&#34;: false, &#34;ESTIMATE_QUERY_COST&#34;: false, &#34;GLOBAL_ASYNC_QUERIES&#34;: false, &#34;IMPERSONATE_WITH_EMAIL_PREFIX&#34;: false, &#34;PLAYWRIGHT_REPORTS_AND_THUMBNAILS&#34;: false, &#34;RLS_IN_SQLLAB&#34;: false, &#34;SSH_TUNNELING&#34;: false, &#34;AWS_DATABASE_IAM_AUTH&#34;: false, &#34;GLOBAL_TASK_FRAMEWORK&#34;: false, &#34;USE_ANALOGOUS_COLORS&#34;: false, &#34;DASHBOARD_VIRTUALIZATION&#34;: true, &#34;ALERTS_ATTACH_REPORTS&#34;: true, &#34;ALLOW_ADHOC_SUBQUERY&#34;: false, &#34;CACHE_QUERY_BY_USER&#34;: false, &#34;CSS_TEMPLATES&#34;: true, &#34;DASHBOARD_RBAC&#34;: false, &#34;DASHBOARD_VIRTUALIZATION_DEFER_DATA&#34;: false, &#34;DATAPANEL_CLOSED_BY_DEFAULT&#34;: false, &#34;DISABLE_EMBEDDED_SUPERSET_LOGOUT&#34;: false, &#34;DRILL_BY&#34;: true, &#34;DRUID_JOINS&#34;: false, &#34;EMBEDDABLE_CHARTS&#34;: true, &#34;EMBEDDED_SUPERSET&#34;: false, &#34;ENABLE_TEMPLATE_PROCESSING&#34;: false, &#34;ESCAPE_MARKDOWN_HTML&#34;: false, &#34;FILTERBAR_CLOSED_BY_DEFAULT&#34;: false, &#34;FORCE_GARBAGE_COLLECTION_AFTER_EVERY_REQUEST&#34;: false, &#34;LISTVIEWS_DEFAULT_CARD_VIEW&#34;: false, &#34;MENU_HIDE_USER_INFO&#34;: false, &#34;SLACK_ENABLE_AVATARS&#34;: false, &#34;SQLLAB_BACKEND_PERSISTENCE&#34;: true, &#34;SQLLAB_FORCE_RUN_ASYNC&#34;: false, &#34;THUMBNAILS&#34;: false, &#34;ENABLE_FACTORY_RESET_COMMAND&#34;: false, &#34;AVOID_COLORS_COLLISION&#34;: true, &#34;DRILL_TO_DETAIL&#34;: true, &#34;ENABLE_JAVASCRIPT_CONTROLS&#34;: false}, &#34;extra_sequential_color_schemes&#34;: [], &#34;extra_categorical_color_schemes&#34;: [], &#34;menu_data&#34;: {&#34;menu&#34;: [], &#34;brand&#34;: {&#34;path&#34;: &#34;/superset/welcome/&#34;, &#34;icon&#34;: &#34;/static/assets/images/gardiyan-logo.svg&#34;, &#34;alt&#34;: &#34;Superset&#34;, &#34;tooltip&#34;: &#34;&#34;, &#34;text&#34;: &#34;&#34;}, &#34;environment_tag&#34;: {&#34;color&#34;: &#34;processing&#34;, &#34;text&#34;: &#34;&#34;}, &#34;navbar_right&#34;: {&#34;show_watermark&#34;: true, &#34;bug_report_url&#34;: null, &#34;bug_report_icon&#34;: null, &#34;bug_report_text&#34;: &#34;Report a bug&#34;, &#34;documentation_url&#34;: null, &#34;documentation_icon&#34;: null, &#34;documentation_text&#34;: &#34;Documentation&#34;, &#34;version_string&#34;: &#34;0.0.0-dev&#34;, &#34;version_sha&#34;: &#34;&#34;, &#34;build_number&#34;: null, &#34;languages&#34;: {&#34;tr&#34;: {&#34;flag&#34;: &#34;tr&#34;, &#34;name&#34;: &#34;T\u00fcrk\u00e7e&#34;, &#34;url&#34;: &#34;/lang/tr&#34;}, &#34;en&#34;: {&#34;flag&#34;: &#34;us&#34;, &#34;name&#34;: &#34;English&#34;, &#34;url&#34;: &#34;/lang/en&#34;}}, &#34;show_language_picker&#34;: true, &#34;user_is_anonymous&#34;: true, &#34;user_info_url&#34;: &#34;/user_info/&#34;, &#34;user_logout_url&#34;: &#34;/logout/&#34;, &#34;user_login_url&#34;: &#34;/login/&#34;, &#34;locale&#34;: &#34;tr&#34;}}, &#34;pdf_compression_level&#34;: &#34;MEDIUM&#34;, &#34;theme&#34;: {&#34;default&#34;: {&#34;token&#34;: {&#34;brandAppName&#34;: &#34;Superset&#34;, &#34;brandLogoAlt&#34;: &#34;Gardiyan&#34;, &#34;brandLogoUrl&#34;: &#34;/static/assets/images/gardiyan-logo.svg&#34;, &#34;brandLogoMargin&#34;: &#34;18px 0&#34;, &#34;brandLogoHref&#34;: &#34;/&#34;, &#34;brandLogoHeight&#34;: &#34;24px&#34;, &#34;brandSpinnerUrl&#34;: &#34;/static/assets/images/favicon.svg&#34;, &#34;brandSpinnerSvg&#34;: null, &#34;colorPrimary&#34;: &#34;#2893B3&#34;, &#34;colorLink&#34;: &#34;#2893B3&#34;, &#34;colorError&#34;: &#34;#e04355&#34;, &#34;colorWarning&#34;: &#34;#fcc700&#34;, &#34;colorSuccess&#34;: &#34;#5ac189&#34;, &#34;colorInfo&#34;: &#34;#66bcfe&#34;, &#34;fontUrls&#34;: [], &#34;fontFamily&#34;: &#34;Inter, Helvetica, Arial, sans-serif&#34;, &#34;fontFamilyCode&#34;: &#34;&#39;IBM Plex Mono&#39;, &#39;Courier New&#39;, monospace&#34;, &#34;transitionTiming&#34;: 0.3, &#34;brandIconMaxWidth&#34;: 37, &#34;fontSizeXS&#34;: &#34;8&#34;, &#34;fontSizeXXL&#34;: &#34;28&#34;, &#34;fontWeightNormal&#34;: &#34;400&#34;, &#34;fontWeightLight&#34;: &#34;300&#34;, &#34;fontWeightStrong&#34;: &#34;500&#34;, &#34;fontWeightBold&#34;: &#34;700&#34;, &#34;colorEditorSelection&#34;: &#34;#fff5cf&#34;}, &#34;algorithm&#34;: &#34;default&#34;}, &#34;dark&#34;: {&#34;token&#34;: {&#34;brandAppName&#34;: &#34;Superset&#34;, &#34;brandLogoAlt&#34;: &#34;Gardiyan&#34;, &#34;brandLogoUrl&#34;: &#34;/static/assets/images/gardiyan-logo.svg&#34;, &#34;brandLogoMargin&#34;: &#34;18px 0&#34;, &#34;brandLogoHref&#34;: &#34;/&#34;, &#34;brandLogoHeight&#34;: &#34;24px&#34;, &#34;brandSpinnerUrl&#34;: &#34;/static/assets/images/favicon.svg&#34;, &#34;brandSpinnerSvg&#34;: null, &#34;colorPrimary&#34;: &#34;#2893B3&#34;, &#34;colorLink&#34;: &#34;#2893B3&#34;, &#34;colorError&#34;: &#34;#e04355&#34;, &#34;colorWarning&#34;: &#34;#fcc700&#34;, &#34;colorSuccess&#34;: &#34;#5ac189&#34;, &#34;colorInfo&#34;: &#34;#66bcfe&#34;, &#34;fontUrls&#34;: [], &#34;fontFamily&#34;: &#34;Inter, Helvetica, Arial, sans-serif&#34;, &#34;fontFamilyCode&#34;: &#34;&#39;IBM Plex Mono&#39;, &#39;Courier New&#39;, monospace&#34;, &#34;transitionTiming&#34;: 0.3, &#34;brandIconMaxWidth&#34;: 37, &#34;fontSizeXS&#34;: &#34;8&#34;, &#34;fontSizeXXL&#34;: &#34;28&#34;, &#34;fontWeightNormal&#34;: &#34;400&#34;, &#34;fontWeightLight&#34;: &#34;300&#34;, &#34;fontWeightStrong&#34;: &#34;500&#34;, &#34;fontWeightBold&#34;: &#34;700&#34;, &#34;colorEditorSelection&#34;: &#34;#5c4d1a&#34;}, &#34;algorithm&#34;: &#34;dark&#34;}, &#34;enableUiThemeAdministration&#34;: true}}}">
+        
+        
+
+        
+          <!-- Custom URL from theme -->
+          <img
+            src="/static/assets/images/favicon.svg"
+            alt=""
+            aria-label="Loading"
+            style="width: 70px; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+          />
+        
+      </div>
+    
+
+    
+      
+        
+
+<!-- Bundle js spa START -->
+
+<script src="/static/assets/vendors.dcf9a273a5c1a455a2eb.entry.js" async nonce="mBHceS93vkxMnxo3Vz0gb4yLX3bPlfjD"></script>
+
+<script src="/static/assets/thumbnail.d319cb87c95b4588196d.entry.js" async nonce="mBHceS93vkxMnxo3Vz0gb4yLX3bPlfjD"></script>
+
+<script src="/static/assets/spa.9a011045bc507c02d7e5.entry.js" async nonce="mBHceS93vkxMnxo3Vz0gb4yLX3bPlfjD"></script>
+
+<!-- Bundle js spa END -->
+
+      
+      
+
+  
+    
+
+    <script nonce="mBHceS93vkxMnxo3Vz0gb4yLX3bPlfjD">
+      document.addEventListener('DOMContentLoaded', function () {
+        var preloadLinks = document.querySelectorAll('link[rel="preload"][as="style"]');
+        preloadLinks.forEach(function (link) {
+          link.rel = 'stylesheet';
+        });
+      });
+    </script>
+  </body>
+</html>

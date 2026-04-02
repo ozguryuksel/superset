@@ -19,7 +19,16 @@
 import 'src/public-path';
 
 // Accept HMR updates for this entry point
-declare const module: { hot?: { accept: () => void } };
-if (module.hot) {
-  module.hot.accept();
+declare const module:
+  | {
+      hot?: {
+        accept?: () => void;
+      };
+    }
+  | undefined;
+
+const hotModule =
+  typeof module !== 'undefined' ? module?.hot : undefined;
+if (hotModule && typeof hotModule.accept === 'function') {
+  hotModule.accept();
 }

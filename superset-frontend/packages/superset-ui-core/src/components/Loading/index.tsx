@@ -29,8 +29,15 @@ const SIZE_MAP: Record<SizeOption, string> = {
   l: '76px',
 };
 
+const LOGO_SIZE_MAP: Record<SizeOption, string> = {
+  s: '12.6px',
+  m: '21px',
+  l: '30.2px',
+};
+
 const LoaderWrapper = styled.div<{
   $spinnerSize: string;
+  $logoSize: string;
   $opacity: number;
 }>`
   z-index: 99;
@@ -48,47 +55,35 @@ const LoaderWrapper = styled.div<{
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    position: relative;
-  }
-
-  .loader::before,
-  .loader::after {
-    content: '';
-    box-sizing: border-box;
     position: absolute;
-    inset: 0;
-    border-radius: 50%;
-  }
-
-  .loader::before {
-    border-top: 3px solid #cba774;
-    border-right: 3px solid transparent;
+    box-sizing: border-box;
+    border-top: 4px solid #a88860;
+    border-right: 4px solid transparent;
     animation: rotation 1s linear infinite;
   }
 
   .loader::after {
-    inset: 3px;
-    border-left: 3px solid #a88860;
-    border-bottom: 3px solid transparent;
-    animation: rotation 0.7s linear infinite reverse;
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-sizing: border-box;
+    border-left: 4px solid #cba774;
+    border-bottom: 4px solid transparent;
+    animation: rotation 0.5s linear infinite reverse;
   }
 
   .preloader_logo {
-    position: relative;
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38%;
-    height: 38%;
-    animation-name: preloader-bounce;
-    animation-duration: 0.72s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: ${({ $logoSize }) => $logoSize};
+    height: ${({ $logoSize }) => $logoSize};
+    animation: logoBounce 0.9s ease-in-out infinite;
+    z-index: 3;
   }
 
   .preloader_logo > svg,
@@ -96,6 +91,8 @@ const LoaderWrapper = styled.div<{
     width: 100%;
     height: 100%;
     object-fit: contain;
+    transform: none;
+    animation: none;
   }
 
   &.inline-centered {
@@ -120,15 +117,21 @@ const LoaderWrapper = styled.div<{
     }
   }
 
-  @keyframes preloader-bounce {
-    0%,
-    40%,
-    60%,
-    100% {
-      transform: translateY(0);
+  @keyframes logoBounce {
+    0% {
+      transform: translate(-50%, -50%) translateY(0) scale(1, 1);
+    }
+    25% {
+      transform: translate(-50%, -50%) translateY(-8px) scale(1.12, 0.88);
     }
     50% {
-      transform: translateY(-26%);
+      transform: translate(-50%, -50%) translateY(0) scale(0.9, 1.1);
+    }
+    75% {
+      transform: translate(-50%, -50%) translateY(-5px) scale(1.08, 0.92);
+    }
+    100% {
+      transform: translate(-50%, -50%) translateY(0) scale(1, 1);
     }
   }
 `;
@@ -143,6 +146,7 @@ export function Loading({
 
   // Determine size from size prop
   const spinnerSize = SIZE_MAP[size];
+  const logoSize = LOGO_SIZE_MAP[size];
 
   // Opacity - muted reduces to 0.25, otherwise full opacity
   const opacity = muted ? 0.25 : 1.0;
@@ -167,6 +171,7 @@ export function Loading({
   return (
     <LoaderWrapper
       $spinnerSize={spinnerSize}
+      $logoSize={logoSize}
       $opacity={opacity}
       className={cls('loading', position, className)}
       role="status"
@@ -174,9 +179,8 @@ export function Loading({
       aria-label={t('Loading')}
       data-test="loading-indicator"
     >
-      <div className="loader">
-        <div className="preloader_logo">{renderSpinner()}</div>
-      </div>
+      <div className="loader" />
+      <div className="preloader_logo">{renderSpinner()}</div>
     </LoaderWrapper>
   );
 }

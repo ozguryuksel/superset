@@ -24,7 +24,7 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
-import { css } from '@apache-superset/core/theme';
+import { css, SupersetTheme } from '@apache-superset/core/theme';
 import { Layout, Loading } from '@superset-ui/core/components';
 import { setupAGGridModules } from '@superset-ui/core/components/ThemedAgGridReact';
 import { ErrorBoundary } from 'src/components';
@@ -85,12 +85,24 @@ const App = () => (
             <Route path={path} key={path}>
               <Suspense fallback={<Fallback />}>
                 <Layout>
-                  <Layout.Content
-                    css={css`
-                      display: flex;
-                      flex-direction: column;
-                    `}
-                  >
+                <Layout.Content
+                  css={(theme: SupersetTheme) => css`
+                    display: flex;
+                    flex-direction: column;
+                    box-sizing: border-box;
+                    padding-top: var(--superset-home-header-height, 0px);
+                    transition:
+                      margin-left 0.25s ease,
+                      width 0.25s ease;
+
+                    @media (min-width: ${theme.screenLG}px) {
+                      margin-left: var(--superset-home-sidebar-offset, 0px);
+                      width: calc(
+                        100% - var(--superset-home-sidebar-offset, 0px)
+                      );
+                    }
+                  `}
+                >
                     <ErrorBoundary
                       css={css`
                         margin: 16px;

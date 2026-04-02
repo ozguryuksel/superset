@@ -39,10 +39,7 @@ interface LanguagePickerProps {
 const StyledLabel = styled.div`
   display: flex;
   align-items: center;
-
-  & i {
-    margin-right: ${({ theme }) => theme.sizeUnit * 2}px;
-  }
+  line-height: ${({ theme }) => theme.sizeUnit * 5}px;
 
   & a {
     display: block;
@@ -50,6 +47,15 @@ const StyledLabel = styled.div`
     word-wrap: break-word;
     text-decoration: none;
   }
+`;
+
+const StyledLanguageTrigger = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: ${({ theme }) => theme.sizeUnit * 5}px;
+  font-weight: ${({ theme }) => theme.fontWeightStrong};
+  text-transform: uppercase;
 `;
 
 export const useLanguageMenuItems = ({
@@ -67,13 +73,16 @@ export const useLanguageMenuItems = ({
         : locale?.split('_')[0] || locale;
     const selectedLanguage =
       safeLanguages[normalizedLocaleKey] || languageEntries[0]?.[1];
-    const selectedFlag = selectedLanguage?.flag || 'us';
+    const selectedCode =
+      normalizedLocaleKey ||
+      languageEntries[0]?.[0] ||
+      selectedLanguage?.name ||
+      'en';
 
     const items: MenuItem[] = languageEntries.map(([langKey, language]) => ({
       key: langKey,
       label: (
-        <StyledLabel className="f16">
-          <i className={`flag ${language.flag || 'us'}`} />
+        <StyledLabel>
           <Typography.Link href={language.url || '#'}>
             {language.name || langKey}
           </Typography.Link>
@@ -86,9 +95,9 @@ export const useLanguageMenuItems = ({
       key: 'language-submenu',
       type: 'submenu' as const,
       label: (
-        <span className="f16" aria-label={t('Languages')}>
-          <i className={`flag ${selectedFlag}`} />
-        </span>
+        <StyledLanguageTrigger aria-label={t('Languages')}>
+          {selectedCode}
+        </StyledLanguageTrigger>
       ),
       icon: <Icons.CaretDownOutlined iconSize="xs" />,
       children: items,
